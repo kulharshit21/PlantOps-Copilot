@@ -85,7 +85,7 @@ The system retrieves SOP/manual/work-order chunks, predicts failure risk, explai
 
 - Phase 0: Repository planning and safety baseline
 - Phase 1: Monorepo app scaffolding and local developer workflow
-- Phase 2: FastAPI domain models, seed data, and mock triage endpoints
+- Phase 2: Supabase schema, RLS policies, seed data, and backend DB config
 - Phase 3: Next.js dashboard, asset registry, and demo workflow UI
 - Phase 4: Supabase schema, RLS policies, storage, and seed corpus
 - Phase 5: RAG ingestion, retrieval, citations, and provider adapters

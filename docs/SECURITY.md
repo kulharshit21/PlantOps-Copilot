@@ -27,3 +27,25 @@
 ## Phase 0 Review
 
 This phase creates documentation, empty project folders, `.gitignore`, and placeholder environment configuration only. It does not add application code, credentials, or data.
+
+## Supabase RLS Design
+
+PlantOps Copilot treats plant operations data as tenant-scoped and plant-scoped. Every operational table in the public schema has Row Level Security enabled, and policies are written for the `authenticated` role only. No policy grants anonymous public row access.
+
+Authorization data lives in `public.profiles`, keyed by the Supabase Auth user id. Policies do not use `user_metadata`, because user-editable metadata is unsafe for authorization. Private helper functions in the non-exposed `app_private` schema resolve the current user's organization, assigned plants, and role. This keeps policies consistent while avoiding public security-definer functions.
+
+Access model:
+
+- Technicians can read data for assigned plants and create incidents/RAG queries for those plants.
+- Reliability engineers share assigned-plant read access for evidence and predictions.
+- Supervisors can create and update work orders for assigned plants.
+- Admins can manage organization and plant data inside their organization.
+- Audit logs are readable by organization admins and insertable only by authenticated users acting as themselves.
+
+Threat model:
+
+- Cross-tenant reads are blocked by `organization_id` checks.
+- Cross-plant reads are blocked unless the user is assigned to the plant or is an organization admin.
+- Browser clients must use only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- `SUPABASE_SERVICE_ROLE_KEY` is backend-only and must never appear in frontend code or public environment variables.
+- RLS remains the final database enforcement layer even if a backend route has a bug.

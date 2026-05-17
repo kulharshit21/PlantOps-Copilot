@@ -378,6 +378,18 @@ class SupabaseService:
         )
         return self._work_order_from_row(rows[0])
 
+    def list_work_orders(self, user: Any) -> list[WorkOrderRead]:
+        rows = self.rest_select(
+            "work_orders",
+            {
+                "select": "id,asset_id,title,status,priority,description,ai_recommendation,created_at,plant_id",
+                "organization_id": f"eq.{user.organization_id}",
+                "plant_id": f"eq.{self._scoped_plant_id(user, None)}",
+                "order": "created_at.desc",
+            },
+        )
+        return [self._work_order_from_row(row) for row in rows]
+
     def update_work_order(
         self,
         user: Any,

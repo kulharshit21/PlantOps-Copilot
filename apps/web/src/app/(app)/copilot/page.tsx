@@ -117,17 +117,12 @@ export default function CopilotPage() {
     setLoading(true);
     setError(null);
     try {
-      const apiBaseUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-      const response = await fetch(`${apiBaseUrl}/rag/ask`, {
+      const response = await apiFetch<RagResponse>("/rag/ask", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        accessToken,
         body: JSON.stringify({ question, top_k: 4 }),
       });
-      if (!response.ok) {
-        throw new Error(`API returned ${response.status}`);
-      }
-      setResult((await response.json()) as RagResponse);
+      setResult(response);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to reach API");
       setResult(fallbackResponse);
@@ -140,11 +135,9 @@ export default function CopilotPage() {
     setTriageLoading(true);
     setError(null);
     try {
-      const apiBaseUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-      const response = await fetch(`${apiBaseUrl}/triage/run`, {
+      const response = await apiFetch<TriageResponse>("/triage/run", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        accessToken,
         body: JSON.stringify({
           question,
           asset_id: "asset-line-2-spindle",
@@ -157,10 +150,7 @@ export default function CopilotPage() {
           incident_notes: "Operator reported vibration during shift handoff.",
         }),
       });
-      if (!response.ok) {
-        throw new Error(`API returned ${response.status}`);
-      }
-      setTriage((await response.json()) as TriageResponse);
+      setTriage(response);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to run triage");
     } finally {

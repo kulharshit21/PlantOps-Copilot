@@ -1,15 +1,22 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import logging
 
 from app.api.routes import assets, documents, incidents, ops, rag, risk, system, triage, work_orders
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
 
+logger = logging.getLogger(__name__)
+
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     configure_logging()
     active_settings = settings or get_settings()
+    active_settings.validate_startup_security()
+    if active_settings.demo_mode:
+        logger.warning("DEMO MODE ACTIVE: unauthenticated local demo requests are allowed.")
+
     app = FastAPI(
         title=active_settings.app_name,
         version=active_settings.app_version,

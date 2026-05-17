@@ -16,6 +16,7 @@ class Settings(BaseSettings):
         alias="SUPABASE_SERVICE_ROLE_KEY",
     )
     supabase_jwt_secret: SecretStr | None = Field(default=None, alias="SUPABASE_JWT_SECRET")
+    supabase_jwks_url: str | None = Field(default=None, alias="SUPABASE_JWKS_URL")
     model_artifact_path: str = Field(default="./ml/artifacts/failure_model.joblib", alias="MODEL_ARTIFACT_PATH")
     mistral_api_key: SecretStr | None = Field(default=None, alias="MISTRAL_API_KEY")
     mistral_model: str = Field(default="mistral-large-latest", alias="MISTRAL_MODEL")
@@ -47,6 +48,26 @@ class Settings(BaseSettings):
         if "*" in value:
             raise ValueError("CORS_ORIGINS must not contain wildcard origins")
         return value
+
+    @property
+    def is_production(self) -> bool:
+        return self.app_env.lower() in {"production", "prod"}
+
+    def validate_startup_security(self) -> None:
+        if self.is_production and self.demo_mode:
+            raise ValueError("DEMO_MODE must be false when APP_ENV=production")
+
+        if not self.demo_mode:
+            missing: list[str] = []
+            if not self.supabase_url:
+                missing.append("SUPABASE_URL")
+            if self.supabase_anon_key is None:
+                missing.append("SUPABASE_ANON_KEY")
+            if self.supabase_service_role_key is None:
+                missing.append("SUPABASE_SERVICE_ROLE_KEY")
+            if missing:
+                joined = ", ".join(missing)
+                raise ValueError(f"Live mode requires backend auth/data settings: {joined}")
 
 
 @lru_cache

@@ -64,10 +64,38 @@ High-level flow:
 
 ## Local Setup
 
-Install frontend dependencies and backend test dependencies:
+Copy the safe template and keep real secrets outside git:
 
 ```bash
 cp .env.example .env
+```
+
+Use `DEMO_MODE=true` only for local no-auth demos. In live mode set `DEMO_MODE=false`; the API then requires Supabase Auth plus server-only Supabase credentials and will fail closed if they are missing.
+
+Required live environment boundary:
+
+```text
+# backend only
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_JWT_SECRET=          # optional legacy local verification
+SUPABASE_JWKS_URL=            # optional JWKS reference
+MISTRAL_API_KEY=
+OLLAMA_BASE_URL=
+DEMO_MODE=false
+
+# browser-safe frontend only
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_API_BASE_URL=
+```
+
+Never expose `SUPABASE_SERVICE_ROLE_KEY`, JWT secrets, or provider API keys through `NEXT_PUBLIC_` variables.
+
+Install frontend dependencies and backend test dependencies:
+
+```bash
 cd apps/web
 npm install
 cd ../api

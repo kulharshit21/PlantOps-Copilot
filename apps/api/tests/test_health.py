@@ -32,3 +32,17 @@ def test_version_endpoint() -> None:
 def test_cors_rejects_wildcard_origins() -> None:
     with pytest.raises(ValueError, match="wildcard"):
         Settings(CORS_ORIGINS="*")
+
+
+def test_production_rejects_demo_mode() -> None:
+    settings = Settings(APP_ENV="production", DEMO_MODE=True)
+
+    with pytest.raises(ValueError, match="DEMO_MODE"):
+        settings.validate_startup_security()
+
+
+def test_live_mode_requires_supabase_auth_settings() -> None:
+    settings = Settings(DEMO_MODE=False)
+
+    with pytest.raises(ValueError, match="SUPABASE_URL"):
+        settings.validate_startup_security()

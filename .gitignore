@@ -1,0 +1,82 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+.turbo/
+.vercel/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+htmlcov/
+.coverage
+.coverage.*
+pip-wheel-metadata/
+*.egg-info/
+
+# Supabase and local databases
+.supabase/
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.sql.gz
+
+# ML artifacts and notebooks
+ml/artifacts/*
+!ml/artifacts/.gitkeep
+ml/data/*
+!ml/data/.gitkeep
+ml/reports/*
+!ml/reports/.gitkeep
+mlruns/
+*.pkl
+*.joblib
+*.onnx
+*.pt
+*.pth
+*.parquet
+*.csv
+*.tsv
+.ipynb_checkpoints/
+
+# Logs and runtime files
+logs/
+*.log
+*.pid
+tmp/
+temp/
+.cache/
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

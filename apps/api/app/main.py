@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import logging
 from time import perf_counter
 
-from app.api.routes import assets, documents, incidents, ops, rag, risk, system, triage, work_orders
+from app.api.routes import assets, documents, incidents, ops, rag, risk, security, system, triage, work_orders
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
 from app.services.metrics import METRICS
@@ -72,6 +72,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(triage.router)
     app.include_router(work_orders.router)
     app.include_router(ops.router)
+    app.include_router(security.router)
 
     return app
 

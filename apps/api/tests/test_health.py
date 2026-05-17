@@ -36,6 +36,16 @@ def test_prometheus_metrics_endpoint() -> None:
     assert "plantops_request_count" in response.text
 
 
+def test_security_readiness_endpoint_reports_truthful_flags() -> None:
+    response = client.get("/security/readiness")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["demo_mode"] is True
+    assert payload["auth_configured"] is False
+    assert payload["rls_migration_files_detected"] is True
+
+
 def test_cors_rejects_wildcard_origins() -> None:
     with pytest.raises(ValueError, match="wildcard"):
         Settings(CORS_ORIGINS="*")

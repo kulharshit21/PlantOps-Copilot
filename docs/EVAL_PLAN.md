@@ -1,5 +1,12 @@
 # Evaluation Plan
 
+## RAG Retrieval Baseline
+
+- Verify every retrieved chunk includes `chunk_id`, `document_id`, `source_uri`, and page metadata when available.
+- Run tenant/plant isolation tests so a query from one plant cannot retrieve another plant's chunks.
+- Track `hit@k` against the seeded spindle vibration, tool wear, overheating, lockout/tagout, and historical work-order corpus.
+- Treat retrieval-only answers as acceptable fallback only when LLM providers are unavailable, and label that behavior in reports.
+
 ## RAG Evaluation
 
 - Retrieval hit rate on known SOP/manual questions.

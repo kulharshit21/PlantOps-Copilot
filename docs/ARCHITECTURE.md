@@ -47,6 +47,10 @@ app/models     persistence models placeholder
 
 Protected routes use a shared `get_current_user` dependency. `DEMO_MODE=true` enables the local hackathon path without external Supabase auth. With `DEMO_MODE=false`, protected routes reject unauthenticated requests until Supabase JWT verification is completed.
 
+## RAG Storage Foundation
+
+Document ingestion accepts `.md`/`.txt` style text content through the backend, chunks it into citation-friendly passages, generates deterministic mock embeddings for local tests, and stores chunks in a scoped document store. Search always filters by organization and plant before returning citations. The Supabase migration adds richer chunk citation fields and a `match_document_chunks` RPC for pgvector cosine search when the hosted database is connected.
+
 ## Deployment Direction
 
 The hackathon target is local Docker Compose plus cloud-ready configuration. Supabase free tier is the planned hosted data plane, with local seed data supporting demos when external APIs are unavailable.

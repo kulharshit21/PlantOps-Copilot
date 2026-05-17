@@ -25,7 +25,26 @@ def test_rag_ask_returns_citations() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["citations"]
-    assert payload["citations"][0]["chunk_id"].startswith("chunk-")
+    assert payload["citations"][0]["chunk_id"]
+    assert payload["citations"][0]["document_id"]
+    assert payload["citations"][0]["source_uri"].startswith("seed://")
+
+
+def test_document_ingest_endpoint_returns_chunks() -> None:
+    response = client.post(
+        "/documents/ingest",
+        json={
+            "title": "Demo bearing SOP",
+            "document_type": "sop",
+            "content": "Page 1\nBearing vibration requires inspection.\n\nPage 2\nUse lockout tagout before opening guards.",
+            "source_uri": "seed://test/bearing",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["chunk_count"] >= 1
+    assert payload["chunks"][0]["source_uri"] == "seed://test/bearing"
 
 
 def test_risk_predict_validates_and_scores() -> None:

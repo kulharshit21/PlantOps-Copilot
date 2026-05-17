@@ -1,10 +1,18 @@
 from app.schemas.documents import RagAskRequest, RagAskResponse
-from app.services.demo_data import DEMO_CHUNKS
+from app.core.security import CurrentUser
+from app.services.document_store import DOCUMENT_STORE
+from app.services.seed_corpus import ensure_seed_corpus
 
 
 class RagService:
-    def ask(self, request: RagAskRequest) -> RagAskResponse:
-        chunks = DEMO_CHUNKS[: request.top_k]
+    def ask(self, request: RagAskRequest, user: CurrentUser) -> RagAskResponse:
+        ensure_seed_corpus()
+        chunks = DOCUMENT_STORE.search(
+            query=request.question,
+            user=user,
+            plant_id=request.plant_id,
+            top_k=request.top_k,
+        )
         if not chunks:
             return RagAskResponse(
                 answer="No relevant evidence was found. Escalate to a supervisor before taking action.",
@@ -22,7 +30,7 @@ class RagService:
             ),
             citations=chunks,
             retrieved_chunks=chunks,
-            model_used="mock-grounded-demo",
+            model_used="retrieval-grounded-demo",
             fallback_used=False,
-            confidence_notes="Grounded in demo SOP chunks; full LLM provider arrives in RAG phase.",
+            confidence_notes="Grounded in retrieved seed corpus chunks; full LLM provider arrives next.",
         )

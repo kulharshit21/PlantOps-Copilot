@@ -19,4 +19,4 @@ def ask_rag(
         resource_type="rag_query",
         metadata={"question_length": len(request.question), "top_k": request.top_k},
     )
-    return RagService().ask(request)
+    return RagService().ask(request, user)

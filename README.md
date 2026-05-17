@@ -73,6 +73,7 @@ GET  /version
 GET  /assets
 GET  /incidents
 GET  /documents
+POST /documents/ingest
 POST /rag/ask
 POST /risk/predict
 GET  /work-orders

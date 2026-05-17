@@ -3,7 +3,9 @@ from fastapi.testclient import TestClient
 
 from app.core.config import Settings, get_settings
 import app.core.security as security
+import app.api.routes.assets as assets_route
 from app.main import app
+from app.services.demo_data import DEMO_ASSETS
 from app.services.supabase import SupabaseAuthError, SupabaseProfile, VerifiedSupabaseUser
 
 
@@ -52,6 +54,12 @@ class RejectingSupabaseService:
         raise AssertionError(f"Should not load profile for {user_id}")
 
 
+class WorkingAssetService(WorkingSupabaseService):
+    def list_assets(self, user):
+        _ = user
+        return DEMO_ASSETS
+
+
 def test_invalid_token_rejected_when_demo_mode_off(monkeypatch) -> None:
     app.dependency_overrides[get_settings] = live_settings
     monkeypatch.setattr(security, "SupabaseService", RejectingSupabaseService)
@@ -67,6 +75,7 @@ def test_invalid_token_rejected_when_demo_mode_off(monkeypatch) -> None:
 def test_current_user_loads_profile_role_and_scope(monkeypatch) -> None:
     app.dependency_overrides[get_settings] = live_settings
     monkeypatch.setattr(security, "SupabaseService", WorkingSupabaseService)
+    monkeypatch.setattr(assets_route, "SupabaseService", WorkingAssetService)
     try:
         response = client.get("/assets", headers={"Authorization": "Bearer valid-token"})
     finally:

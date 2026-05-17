@@ -25,6 +25,7 @@ import {
 type AuthState = {
   user: DemoUser;
   supabaseUser: User | null;
+  accessToken: string | null;
   isDemoMode: boolean;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<DemoUser>(defaultDemoUser);
   const [supabaseUser, setSupabaseUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const isDemoMode = !isSupabaseConfigured();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
@@ -65,14 +67,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const { data } = await supabase.auth.getUser();
+      const [{ data: userData }, { data: sessionData }] = await Promise.all([
+        supabase.auth.getUser(),
+        supabase.auth.getSession(),
+      ]);
       if (!isMounted) return;
 
-      setSupabaseUser(data.user);
+      setSupabaseUser(userData.user);
+      setAccessToken(sessionData.session?.access_token ?? null);
       setUser({
         ...defaultDemoUser,
-        email: data.user?.email ?? defaultDemoUser.email,
-        name: data.user?.email?.split("@")[0] ?? defaultDemoUser.name,
+        email: userData.user?.email ?? defaultDemoUser.email,
+        name: userData.user?.email?.split("@")[0] ?? defaultDemoUser.name,
       });
       setIsLoading(false);
     }
@@ -81,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
       setSupabaseUser(session?.user ?? null);
+      setAccessToken(session?.access_token ?? null);
     });
 
     return () => {
@@ -128,6 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     window.localStorage.removeItem(demoStorageKey);
     setSupabaseUser(null);
+    setAccessToken(null);
     setUser(defaultDemoUser);
     router.push("/login");
   }, [router, supabase]);
@@ -136,6 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       user,
       supabaseUser,
+      accessToken,
       isDemoMode,
       isLoading,
       isAuthenticated: isDemoMode || Boolean(supabaseUser),
@@ -150,6 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithPassword,
       signOut,
       supabaseUser,
+      accessToken,
       user,
     ],
   );

@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
   test-build-scan:
@@ -42,6 +41,27 @@ jobs:
 
       - name: Backend tests
         run: python -m pytest apps/api/tests
+
+      - name: RAG citation smoke eval
+        run: python evals/rag/run_rag_smoke.py
+
+      - name: Role permission smoke eval
+        run: python evals/security/role_permission_smoke.py
+
+      - name: Secret grep smoke eval
+        run: python evals/security/secret_grep.py
+
+      - name: SQL seed sanity check
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          seed = Path("supabase/seed.sql").read_text()
+          assert "insert into public.document_chunks" in seed
+          assert "title," in seed
+          assert "source_uri" in seed
+          assert "source_page" in seed
+          print("seed sanity ok")
+          PY
 
       - name: Docker Compose config
         run: docker compose config

@@ -58,7 +58,24 @@ The Next.js role-aware shell uses Supabase browser auth when public Supabase env
 
 The FastAPI foundation centralizes auth checks in `app/core/security.py`. In local demo mode, requests without bearer tokens receive a fixed demo supervisor identity so the pitch flow works offline. When `DEMO_MODE=false`, protected routes fail closed with `401 Authentication required`.
 
-Current Supabase JWT handling is intentionally a placeholder. Production work must verify JWTs against Supabase project keys/JWKS, map roles from trusted server-side profile data, and keep RLS as the final database boundary. Sensitive request metadata is masked before audit logging. Rate limiting is marked in `app/main.py` before routes that will call LLM providers or create operational records.
+Live mode verifies bearer tokens with Supabase Auth and then loads role, organization, plant, and profile identity from `public.profiles`. The backend does not trust frontend role claims. Sensitive request metadata is masked before audit logging. Rate limiting is marked in `app/main.py` before routes that will call LLM providers or create operational records.
+
+## Live RLS And Storage Updates
+
+The live schema fix migration aligns database constraints with the API lifecycle:
+
+- Asset status accepts `high_risk` for the demo asset while preserving existing operational states.
+- Work orders accept `draft`, `review`, `approved`, `assigned`, and `closed` for the backend lifecycle.
+- Seeded document chunks include `title`, `source_uri`, and `source_page`, matching the citation columns required by RAG.
+- `match_document_chunks` prefers pgvector similarity, but can return scoped seed chunks with a low fallback score when embeddings have not been generated yet. This keeps demos honest: citations are real rows, while embedding quality is reported separately.
+
+Storage object access is path-scoped. Objects must use:
+
+```text
+{organization_id}/{plant_id}/filename
+```
+
+Storage policies check the authenticated profile's organization and assigned plant before allowing reads or writes. The service-role key remains backend-only and must never be exposed to browser code.
 
 ## Supabase End-to-End Setup Notes
 
@@ -67,8 +84,9 @@ Codex MCP is authenticated for the project, but this running session does not ex
 Required backend secrets:
 
 - `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_JWT_SECRET` if local JWT verification is used
+- `SUPABASE_JWT_SECRET` or `SUPABASE_JWKS_URL` only if local JWT verification is used instead of Supabase Auth verification
 
 Frontend must only receive `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 

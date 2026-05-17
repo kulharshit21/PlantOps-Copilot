@@ -148,6 +148,12 @@ Start the API locally:
 docker compose up api
 ```
 
+Seed a local Supabase/Postgres database after migrations:
+
+```bash
+DATABASE_URL=postgresql://postgres:postgres@localhost:54322/postgres python ops/scripts/seed_demo_data.py
+```
+
 Open the web demo at `/login`. If Supabase public env vars are absent, the app uses a local demo role switcher so the hackathon flow still works.
 
 No real secrets should be committed. Browser-safe variables must use public-safe values only, and server-only keys must stay in backend runtime environments.

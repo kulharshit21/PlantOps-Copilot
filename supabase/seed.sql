@@ -24,7 +24,7 @@ values
     'L2-SPINDLE-01',
     'Line 2 Spindle',
     'Line 2',
-    'critical',
+    'high_risk',
     0.8700,
     '{"torque_nm": 82.4, "tool_wear_min": 238, "operator_note": "vibration reported during last batch"}'::jsonb
   ),
@@ -82,7 +82,21 @@ values
   )
 on conflict (id) do nothing;
 
-insert into public.document_chunks (id, organization_id, plant_id, document_id, created_by, chunk_index, content, citation_label, page_number, metadata)
+insert into public.document_chunks (
+  id,
+  organization_id,
+  plant_id,
+  document_id,
+  created_by,
+  chunk_index,
+  content,
+  citation_label,
+  page_number,
+  title,
+  source_uri,
+  source_page,
+  metadata
+)
 values
   (
     '00000000-0000-4000-8000-000000000601',
@@ -93,6 +107,9 @@ values
     0,
     'If spindle vibration is reported with elevated torque, reduce feed rate, pause noncritical production, and inspect tool wear before the next shift begins.',
     'SOP-17#chunk-0',
+    2,
+    'SOP-17 Spindle Vibration Response',
+    'seed://sop-17-spindle-vibration',
     2,
     '{"section": "Initial response"}'::jsonb
   ),
@@ -106,6 +123,9 @@ values
     'Before spindle inspection, follow lockout-tagout, verify zero energy state, and record bearing temperature and vibration readings in the maintenance log.',
     'SOP-17#chunk-1',
     3,
+    'SOP-17 Spindle Vibration Response',
+    'seed://sop-17-spindle-vibration',
+    3,
     '{"section": "Safety controls"}'::jsonb
   ),
   (
@@ -117,6 +137,9 @@ values
     0,
     'Rising tool wear combined with abnormal torque can indicate bearing preload issues, tool imbalance, or early spindle degradation. Schedule inspection within one shift if risk is high.',
     'Manual-08#chunk-0',
+    14,
+    'Manual-08 CNC Spindle Maintenance',
+    'seed://manual-08-cnc-spindle',
     14,
     '{"section": "Failure modes"}'::jsonb
   )

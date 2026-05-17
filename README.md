@@ -82,6 +82,7 @@ GET  /documents
 POST /documents/ingest
 POST /rag/ask
 POST /risk/predict
+POST /triage/run
 GET  /work-orders
 POST /work-orders
 GET  /ops/metrics-summary

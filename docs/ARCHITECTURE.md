@@ -59,6 +59,10 @@ Document ingestion accepts `.md`/`.txt` style text content through the backend, 
 
 `ml/training/train_failure_model.py` trains Logistic Regression and Random Forest baselines from AI4I 2020 CSV features when available, selects the best F1 model, and writes a local `joblib` artifact. If the CSV is absent, it uses a tiny synthetic fallback only to verify pipeline mechanics. The API risk service loads the artifact when present and otherwise returns a labeled heuristic demo response.
 
+## Agentic Triage
+
+`/triage/run` composes retrieval, cited answer generation, risk scoring, safety checks, and draft work-order JSON. The workflow is deterministic today, uses Pydantic schemas for every boundary, and never writes the drafted work order to the database without a future user-confirmed create action.
+
 ## Deployment Direction
 
 The hackathon target is local Docker Compose plus cloud-ready configuration. Supabase free tier is the planned hosted data plane, with local seed data supporting demos when external APIs are unavailable.

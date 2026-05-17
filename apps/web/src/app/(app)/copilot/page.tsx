@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bot, ChevronDown, FileText, Gauge, Send, ShieldCheck } from "lucide-react";
+import { Bot, ChevronDown, ClipboardList, FileText, Gauge, Send, ShieldCheck } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/lib/status";
@@ -26,6 +26,23 @@ type RagResponse = {
   model_used: string;
   fallback_used: boolean;
   confidence_notes: string;
+};
+
+type TriageResponse = {
+  issue_summary: string;
+  urgency: string;
+  risk_score: number;
+  likely_failure_mode: string;
+  recommended_actions: string[];
+  safety_checks: string[];
+  parts_tools_needed: string[];
+  drafted_work_order: {
+    title: string;
+    priority: string;
+    description: string;
+    acceptance_criteria: string[];
+  };
+  model_used: string;
 };
 
 const demoQuestion =
@@ -75,8 +92,10 @@ export default function CopilotPage() {
   const [question, setQuestion] = useState(demoQuestion);
   const [result, setResult] = useState<RagResponse>(fallbackResponse);
   const [loading, setLoading] = useState(false);
+  const [triageLoading, setTriageLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showEvidence, setShowEvidence] = useState(true);
+  const [triage, setTriage] = useState<TriageResponse | null>(null);
 
   async function askCopilot() {
     setLoading(true);
@@ -98,6 +117,38 @@ export default function CopilotPage() {
       setResult(fallbackResponse);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function runTriage() {
+    setTriageLoading(true);
+    setError(null);
+    try {
+      const apiBaseUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+      const response = await fetch(`${apiBaseUrl}/triage/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question,
+          asset_id: "asset-line-2-spindle",
+          telemetry: {
+            torque_nm: 104,
+            tool_wear_min: 220,
+            vibration_mm_s: 9.4,
+            temperature_c: 78,
+          },
+          incident_notes: "Operator reported vibration during shift handoff.",
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}`);
+      }
+      setTriage((await response.json()) as TriageResponse);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to run triage");
+    } finally {
+      setTriageLoading(false);
     }
   }
 
@@ -144,6 +195,15 @@ export default function CopilotPage() {
             <Send className="h-4 w-4" />
             {loading ? "Asking..." : "Ask copilot"}
           </button>
+          <button
+            type="button"
+            onClick={runTriage}
+            disabled={triageLoading}
+            className="ml-3 mt-4 inline-flex items-center gap-2 rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            <ClipboardList className="h-4 w-4" />
+            {triageLoading ? "Running..." : "Run triage"}
+          </button>
 
           {error ? (
             <p className="mt-3 text-sm text-amber-600 dark:text-amber-300">
@@ -180,6 +240,42 @@ export default function CopilotPage() {
               </ol>
             </div>
           </div>
+
+          {triage ? (
+            <div className="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-5 dark:border-blue-900 dark:bg-blue-950">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge tone="critical">{triage.urgency.toUpperCase()}</StatusBadge>
+                <StatusBadge tone="watch">Risk {Math.round(triage.risk_score * 100)}%</StatusBadge>
+                <StatusBadge tone="neutral">{triage.model_used}</StatusBadge>
+              </div>
+              <h3 className="mt-4 font-semibold">{triage.drafted_work_order.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
+                {triage.issue_summary}
+              </p>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div>
+                  <p className="text-xs font-semibold uppercase text-slate-500">
+                    Recommended actions
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-slate-700 dark:text-slate-200">
+                    {triage.recommended_actions.map((action) => (
+                      <li key={action}>- {action}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase text-slate-500">
+                    Safety checks
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-slate-700 dark:text-slate-200">
+                    {triage.safety_checks.map((check) => (
+                      <li key={check}>- {check}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">

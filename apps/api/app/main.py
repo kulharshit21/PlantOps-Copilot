@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import assets, documents, incidents, ops, rag, risk, system, work_orders
+from app.api.routes import assets, documents, incidents, ops, rag, risk, system, triage, work_orders
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
 
@@ -43,6 +43,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(documents.router)
     app.include_router(rag.router)
     app.include_router(risk.router)
+    app.include_router(triage.router)
     app.include_router(work_orders.router)
     app.include_router(ops.router)
 

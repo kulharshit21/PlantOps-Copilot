@@ -112,6 +112,7 @@ export default function CopilotPage() {
     "Page 1\nIf spindle vibration rises with torque and tool wear, pause production at the next safe stop and inspect tool holder runout. Apply lockout/tagout before opening guards.",
   );
   const [ingestMessage, setIngestMessage] = useState<string | null>(null);
+  const [workOrderMessage, setWorkOrderMessage] = useState<string | null>(null);
 
   async function askCopilot() {
     setLoading(true);
@@ -177,6 +178,26 @@ export default function CopilotPage() {
       setIngestMessage(caught instanceof Error ? caught.message : "Document ingestion failed.");
     } finally {
       setIngestLoading(false);
+    }
+  }
+
+  async function createDraftWorkOrder() {
+    if (!triage) return;
+    setWorkOrderMessage(null);
+    try {
+      const order = await apiFetch<{ id: string; status: string }>("/work-orders", {
+        method: "POST",
+        accessToken,
+        body: JSON.stringify({
+          asset_id: "asset-line-2-spindle",
+          title: triage.drafted_work_order.title,
+          priority: triage.drafted_work_order.priority,
+          recommended_action: triage.drafted_work_order.description,
+        }),
+      });
+      setWorkOrderMessage(`Draft ${order.id} created with status ${order.status}.`);
+    } catch (caught) {
+      setWorkOrderMessage(caught instanceof Error ? caught.message : "Could not create draft work order.");
     }
   }
 
@@ -302,6 +323,16 @@ export default function CopilotPage() {
                   </ul>
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={() => void createDraftWorkOrder()}
+                className="mt-4 rounded-md bg-blue-700 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-800"
+              >
+                Create draft work order
+              </button>
+              {workOrderMessage ? (
+                <p className="mt-3 text-sm text-blue-900 dark:text-blue-100">{workOrderMessage}</p>
+              ) : null}
             </div>
           ) : null}
         </section>

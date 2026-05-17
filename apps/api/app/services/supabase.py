@@ -167,6 +167,29 @@ class SupabaseService:
             for row in rows
         ]
 
+    def get_asset(self, user: Any, asset_id: str) -> AssetRead | None:
+        rows = self.rest_select(
+            "assets",
+            {
+                "select": "id,name,line_name,status,risk_score,plant_id",
+                "id": f"eq.{asset_id}",
+                "organization_id": f"eq.{user.organization_id}",
+                "plant_id": f"eq.{self._scoped_plant_id(user, None)}",
+                "limit": "1",
+            },
+        )
+        if not rows:
+            return None
+        row = rows[0]
+        return AssetRead(
+            id=str(row["id"]),
+            name=str(row["name"]),
+            line=str(row.get("line_name") or "Unknown line"),
+            status=self._api_asset_status(str(row.get("status") or "watch")),
+            risk_score=float(row.get("risk_score") or 0),
+            plant_id=str(row["plant_id"]),
+        )
+
     def list_incidents(self, user: Any) -> list[IncidentRead]:
         plant_id = self._scoped_plant_id(user, None)
         rows = self.rest_select(

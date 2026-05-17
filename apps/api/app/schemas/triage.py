@@ -15,6 +15,7 @@ class TriageRunRequest(BaseModel):
     asset_id: str
     telemetry: TriageTelemetry
     incident_notes: str | None = Field(default=None, max_length=2000)
+    create_draft_work_order: bool = False
 
 
 class DraftedWorkOrder(BaseModel):
@@ -35,3 +36,4 @@ class TriageRunResponse(BaseModel):
     drafted_work_order: DraftedWorkOrder
     citations: list[RetrievedChunk]
     model_used: str
+    created_work_order_id: str | None = None

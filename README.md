@@ -1,6 +1,24 @@
 # PlantOps Copilot
 
+[![CI](https://github.com/kulharshit21/PlantOps-Copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/kulharshit21/PlantOps-Copilot/actions/workflows/ci.yml)
+![Stack](https://img.shields.io/badge/stack-Next.js%20%2B%20FastAPI%20%2B%20Supabase-0f766e)
+![Security](https://img.shields.io/badge/security-RLS%20%2B%20DevSecOps-1d4ed8)
+![Demo](https://img.shields.io/badge/demo-hackathon%20ready-059669)
+
 Secure AI maintenance copilot for industrial teams: RAG over SOPs/manuals, predictive failure-risk ML, agentic work-order drafting, LLMOps/MLOps evaluation, observability, and DevSecOps.
+
+```mermaid
+flowchart LR
+  A[Supervisor] --> B[Role-aware Dashboard]
+  B --> C[High-risk Line 2 Spindle]
+  C --> D[RAG Copilot]
+  D --> E[Cited SOP Chunks]
+  D --> F[Risk Model]
+  E --> G[Typed Triage Agent]
+  F --> G
+  G --> H[Draft Work Order]
+  H --> I[Security + Ops Proof]
+```
 
 ## Project Pitch
 

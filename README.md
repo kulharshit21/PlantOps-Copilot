@@ -71,6 +71,8 @@ Start the API locally:
 docker compose up api
 ```
 
+Open the web demo at `/login`. If Supabase public env vars are absent, the app uses a local demo role switcher so the hackathon flow still works.
+
 No real secrets should be committed. Browser-safe variables must use public-safe values only, and server-only keys must stay in backend runtime environments.
 
 ## Main Demo Scenario

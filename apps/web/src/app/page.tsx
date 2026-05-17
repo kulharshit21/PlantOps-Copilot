@@ -70,7 +70,7 @@ export default function Home() {
             </div>
           </div>
           <a
-            href="#demo"
+            href="/login"
             className="inline-flex h-10 items-center gap-2 rounded-md bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
           >
             Demo path
@@ -96,17 +96,17 @@ export default function Home() {
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
-              href="#demo"
+              href="/login"
               className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-teal-600 px-5 text-sm font-semibold text-white shadow-sm shadow-teal-700/20 transition hover:bg-teal-700"
             >
               Run demo scenario
               <ArrowRight aria-hidden="true" size={18} />
             </a>
             <a
-              href="#capabilities"
+              href="/dashboard"
               className="inline-flex h-12 items-center justify-center rounded-md border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             >
-              View capabilities
+              Open dashboard
             </a>
           </div>
         </div>

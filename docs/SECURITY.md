@@ -49,3 +49,7 @@ Threat model:
 - Browser clients must use only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 - `SUPABASE_SERVICE_ROLE_KEY` is backend-only and must never appear in frontend code or public environment variables.
 - RLS remains the final database enforcement layer even if a backend route has a bug.
+
+## Frontend Auth Shell
+
+The Next.js role-aware shell uses Supabase browser auth when public Supabase environment variables are configured, and a demo-mode user switcher when they are missing. This role controls navigation visibility only. It is not an authorization boundary. Any data mutation or sensitive read must still pass backend checks and Supabase RLS policies.

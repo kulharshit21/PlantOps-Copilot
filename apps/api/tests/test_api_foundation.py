@@ -28,6 +28,8 @@ def test_rag_ask_returns_citations() -> None:
     assert payload["citations"][0]["chunk_id"]
     assert payload["citations"][0]["document_id"]
     assert payload["citations"][0]["source_uri"].startswith("seed://")
+    assert payload["recommendation"]
+    assert payload["next_steps"]
 
 
 def test_document_ingest_endpoint_returns_chunks() -> None:

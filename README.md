@@ -99,6 +99,8 @@ A supervisor logs in and sees `Line 2 Spindle` marked high risk. They ask:
 
 The system retrieves SOP/manual/work-order chunks, predicts failure risk, explains the likely failure mode, assigns urgency, drafts a work order, cites evidence, logs traces and metrics, and shows security/CI proof for the demo.
 
+The `/copilot` page can run this scenario against the FastAPI `/rag/ask` endpoint. If the API is offline, it falls back to bundled demo evidence so the pitch path remains presentable.
+
 ## Roadmap
 
 - Phase 0: Repository planning and safety baseline

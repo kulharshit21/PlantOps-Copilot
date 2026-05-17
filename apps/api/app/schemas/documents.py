@@ -41,6 +41,9 @@ class RetrievedChunk(BaseModel):
 
 class RagAskResponse(BaseModel):
     answer: str
+    recommendation: str
+    urgency: str
+    next_steps: list[str]
     citations: list[RetrievedChunk]
     retrieved_chunks: list[RetrievedChunk]
     model_used: str

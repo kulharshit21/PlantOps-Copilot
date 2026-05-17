@@ -53,3 +53,9 @@ Threat model:
 ## Frontend Auth Shell
 
 The Next.js role-aware shell uses Supabase browser auth when public Supabase environment variables are configured, and a demo-mode user switcher when they are missing. This role controls navigation visibility only. It is not an authorization boundary. Any data mutation or sensitive read must still pass backend checks and Supabase RLS policies.
+
+## Backend API Boundary
+
+The FastAPI foundation centralizes auth checks in `app/core/security.py`. In local demo mode, requests without bearer tokens receive a fixed demo supervisor identity so the pitch flow works offline. When `DEMO_MODE=false`, protected routes fail closed with `401 Authentication required`.
+
+Current Supabase JWT handling is intentionally a placeholder. Production work must verify JWTs against Supabase project keys/JWKS, map roles from trusted server-side profile data, and keep RLS as the final database boundary. Sensitive request metadata is masked before audit logging. Rate limiting is marked in `app/main.py` before routes that will call LLM providers or create operational records.

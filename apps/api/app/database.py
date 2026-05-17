@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from app.config import Settings, get_settings
+from app.core.config import Settings, get_settings
 
 
 @dataclass(frozen=True)

@@ -26,6 +26,7 @@ def test_version_endpoint() -> None:
     assert payload["service"] == "PlantOps Copilot API"
     assert payload["version"] == "0.1.0"
     assert payload["environment"] == "development"
+    assert payload["demo_mode"] is True
 
 
 def test_cors_rejects_wildcard_origins() -> None:

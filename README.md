@@ -65,6 +65,21 @@ python -m pytest apps/api/tests
 docker compose config
 ```
 
+API foundation endpoints:
+
+```text
+GET  /health
+GET  /version
+GET  /assets
+GET  /incidents
+GET  /documents
+POST /rag/ask
+POST /risk/predict
+GET  /work-orders
+POST /work-orders
+GET  /ops/metrics-summary
+```
+
 Start the API locally:
 
 ```bash
@@ -89,10 +104,15 @@ The system retrieves SOP/manual/work-order chunks, predicts failure risk, explai
 - Phase 1: Monorepo app scaffolding and local developer workflow
 - Phase 2: Supabase schema, RLS policies, seed data, and backend DB config
 - Phase 3: Next.js dashboard, asset registry, and demo workflow UI
-- Phase 4: Supabase schema, RLS policies, storage, and seed corpus
-- Phase 5: RAG ingestion, retrieval, citations, and provider adapters
-- Phase 6: Predictive maintenance ML training and scoring endpoint
-- Phase 7: Agentic triage and structured work-order drafting
-- Phase 8: Observability, metrics, traces, and operational health UI
-- Phase 9: Evaluation dashboards for RAG, LLM, ML, and security checks
-- Phase 10: CI, vulnerability scanning, secret scanning, and demo hardening
+- Phase 4: Typed FastAPI foundation and protected API contracts
+- Phase 5: Document ingestion, chunking, and RAG retrieval foundation
+- Phase 6: Cited RAG answer endpoint and model fallback
+- Phase 7: Predictive maintenance ML training and scoring endpoint
+- Phase 8: Agentic triage and structured work-order drafting
+- Phase 9: Work-order lifecycle and audit trail
+- Phase 10: Observability, metrics, traces, and operational health UI
+- Phase 11: Evaluation dashboards for RAG, LLM, ML, and security checks
+- Phase 12: CI, vulnerability scanning, secret scanning, and demo hardening
+- Phase 13: Hackathon-grade UI/UX polish
+- Phase 14: End-to-end demo seed and pitch script
+- Phase 15: Final production-readiness review

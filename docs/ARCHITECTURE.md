@@ -33,6 +33,20 @@ evals           RAG, ML, and security evaluation suites
 - `RiskModel`: predictive-maintenance inference contract.
 - `TriageAgent`: typed operational recommendation contract.
 
+## Backend API Foundation
+
+The FastAPI service is split by responsibility:
+
+```text
+app/core       settings, auth dependencies, logging helpers
+app/api/routes route modules grouped by product capability
+app/schemas    Pydantic request/response contracts
+app/services   demo-safe service layer and future provider adapters
+app/models     persistence models placeholder
+```
+
+Protected routes use a shared `get_current_user` dependency. `DEMO_MODE=true` enables the local hackathon path without external Supabase auth. With `DEMO_MODE=false`, protected routes reject unauthenticated requests until Supabase JWT verification is completed.
+
 ## Deployment Direction
 
 The hackathon target is local Docker Compose plus cloud-ready configuration. Supabase free tier is the planned hosted data plane, with local seed data supporting demos when external APIs are unavailable.

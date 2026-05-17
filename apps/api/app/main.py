@@ -1,22 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from fastapi.responses import JSONResponse
 
-from app.config import Settings, get_settings
-
-
-class HealthResponse(BaseModel):
-    status: str = Field(examples=["ok"])
-    service: str = Field(examples=["PlantOps Copilot API"])
-
-
-class VersionResponse(BaseModel):
-    service: str
-    version: str
-    environment: str
+from app.api.routes import assets, documents, incidents, ops, rag, risk, system, work_orders
+from app.core.config import Settings, get_settings
+from app.core.logging import configure_logging
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
+    configure_logging()
     active_settings = settings or get_settings()
     app = FastAPI(
         title=active_settings.app_name,
@@ -33,17 +25,26 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
     )
 
-    @app.get("/health", response_model=HealthResponse, tags=["system"])
-    def health() -> HealthResponse:
-        return HealthResponse(status="ok", service=active_settings.app_name)
-
-    @app.get("/version", response_model=VersionResponse, tags=["system"])
-    def version() -> VersionResponse:
-        return VersionResponse(
-            service=active_settings.app_name,
-            version=active_settings.app_version,
-            environment=active_settings.app_env,
+    # TODO(rate-limit): add per-user/IP limiter before external LLM and write routes.
+    @app.exception_handler(ValueError)
+    async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": "bad_request",
+                "detail": str(exc),
+                "request_id": request.headers.get("X-Request-ID"),
+            },
         )
+
+    app.include_router(system.router)
+    app.include_router(assets.router)
+    app.include_router(incidents.router)
+    app.include_router(documents.router)
+    app.include_router(rag.router)
+    app.include_router(risk.router)
+    app.include_router(work_orders.router)
+    app.include_router(ops.router)
 
     return app
 

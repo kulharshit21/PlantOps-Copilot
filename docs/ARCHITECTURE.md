@@ -63,6 +63,10 @@ Document ingestion accepts `.md`/`.txt` style text content through the backend, 
 
 `/triage/run` composes retrieval, cited answer generation, risk scoring, safety checks, and draft work-order JSON. The workflow is deterministic today, uses Pydantic schemas for every boundary, and never writes the drafted work order to the database without a future user-confirmed create action.
 
+## Work-Order Lifecycle
+
+Work orders support draft creation and review/approval/assignment/closure transitions through typed API contracts. Supervisor/admin approval is enforced in backend route dependencies and service checks; UI visibility is not treated as authorization.
+
 ## Deployment Direction
 
 The hackathon target is local Docker Compose plus cloud-ready configuration. Supabase free tier is the planned hosted data plane, with local seed data supporting demos when external APIs are unavailable.

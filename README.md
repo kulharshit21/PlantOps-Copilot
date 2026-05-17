@@ -85,6 +85,7 @@ POST /risk/predict
 POST /triage/run
 GET  /work-orders
 POST /work-orders
+PATCH /work-orders/{order_id}
 GET  /ops/metrics-summary
 ```
 

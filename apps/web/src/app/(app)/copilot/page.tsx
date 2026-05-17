@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Bot, ChevronDown, ClipboardList, FileText, Gauge, Send, ShieldCheck } from "lucide-react";
 
+import { useAuth } from "@/components/auth-provider";
 import { PageHeader } from "@/components/page-header";
+import { apiFetch } from "@/lib/api";
 import { StatusBadge } from "@/lib/status";
 
 type RetrievedChunk = {
@@ -43,6 +45,13 @@ type TriageResponse = {
     acceptance_criteria: string[];
   };
   model_used: string;
+};
+
+type DocumentIngestResponse = {
+  chunk_count: number;
+  document: {
+    title: string;
+  };
 };
 
 const demoQuestion =
@@ -89,13 +98,20 @@ const fallbackResponse: RagResponse = {
 };
 
 export default function CopilotPage() {
+  const { accessToken } = useAuth();
   const [question, setQuestion] = useState(demoQuestion);
   const [result, setResult] = useState<RagResponse>(fallbackResponse);
   const [loading, setLoading] = useState(false);
   const [triageLoading, setTriageLoading] = useState(false);
+  const [ingestLoading, setIngestLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showEvidence, setShowEvidence] = useState(true);
   const [triage, setTriage] = useState<TriageResponse | null>(null);
+  const [documentTitle, setDocumentTitle] = useState("Shift handoff spindle note");
+  const [documentContent, setDocumentContent] = useState(
+    "Page 1\nIf spindle vibration rises with torque and tool wear, pause production at the next safe stop and inspect tool holder runout. Apply lockout/tagout before opening guards.",
+  );
+  const [ingestMessage, setIngestMessage] = useState<string | null>(null);
 
   async function askCopilot() {
     setLoading(true);
@@ -149,6 +165,28 @@ export default function CopilotPage() {
       setError(caught instanceof Error ? caught.message : "Unable to run triage");
     } finally {
       setTriageLoading(false);
+    }
+  }
+
+  async function ingestDocument() {
+    setIngestLoading(true);
+    setIngestMessage(null);
+    try {
+      const response = await apiFetch<DocumentIngestResponse>("/documents/ingest", {
+        method: "POST",
+        accessToken,
+        body: JSON.stringify({
+          title: documentTitle,
+          document_type: "sop",
+          content: documentContent,
+          source_uri: "ui://copilot/shift-handoff-note",
+        }),
+      });
+      setIngestMessage(`Stored ${response.chunk_count} chunk(s) from ${response.document.title}.`);
+    } catch (caught) {
+      setIngestMessage(caught instanceof Error ? caught.message : "Document ingestion failed.");
+    } finally {
+      setIngestLoading(false);
     }
   }
 
@@ -279,6 +317,33 @@ export default function CopilotPage() {
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="mb-5 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+              Add evidence
+            </p>
+            <input
+              value={documentTitle}
+              onChange={(event) => setDocumentTitle(event.target.value)}
+              className="mt-3 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm outline-none ring-teal-500 focus:ring-2 dark:border-slate-800 dark:bg-slate-900"
+            />
+            <textarea
+              value={documentContent}
+              onChange={(event) => setDocumentContent(event.target.value)}
+              className="mt-3 min-h-28 w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none ring-teal-500 focus:ring-2 dark:border-slate-800 dark:bg-slate-900"
+            />
+            <button
+              type="button"
+              onClick={ingestDocument}
+              disabled={ingestLoading}
+              className="mt-3 rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60 dark:bg-white dark:text-slate-950"
+            >
+              {ingestLoading ? "Storing..." : "Store as SOP evidence"}
+            </button>
+            {ingestMessage ? (
+              <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">{ingestMessage}</p>
+            ) : null}
+          </div>
+
           <button
             type="button"
             onClick={() => setShowEvidence((value) => !value)}

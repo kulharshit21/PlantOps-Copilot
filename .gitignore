@@ -41,6 +41,7 @@ pip-wheel-metadata/
 
 # Supabase and local databases
 .supabase/
+supabase/.temp/
 *.db
 *.sqlite
 *.sqlite3

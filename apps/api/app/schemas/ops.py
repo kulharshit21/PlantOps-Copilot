@@ -9,3 +9,10 @@ class MetricsSummary(BaseModel):
     risk_predictions: int
     fallback_count: int
     status: str
+
+
+class SupabaseHealthRead(BaseModel):
+    configured: bool
+    reachable: bool
+    project_url: str | None
+    detail: str

@@ -89,6 +89,12 @@ Train the predictive-maintenance baseline when the AI4I CSV is available:
 python ml/training/train_failure_model.py --data ml/data/ai4i2020.csv
 ```
 
+Local Ollama fallback defaults to `gemma4:e4b`. Pull it before offline demos:
+
+```bash
+ollama pull gemma4:e4b
+```
+
 API foundation endpoints:
 
 ```text
@@ -105,6 +111,7 @@ GET  /work-orders
 POST /work-orders
 PATCH /work-orders/{order_id}
 GET  /ops/metrics-summary
+GET  /ops/supabase-health
 ```
 
 Start the API locally:

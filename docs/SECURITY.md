@@ -59,3 +59,17 @@ The Next.js role-aware shell uses Supabase browser auth when public Supabase env
 The FastAPI foundation centralizes auth checks in `app/core/security.py`. In local demo mode, requests without bearer tokens receive a fixed demo supervisor identity so the pitch flow works offline. When `DEMO_MODE=false`, protected routes fail closed with `401 Authentication required`.
 
 Current Supabase JWT handling is intentionally a placeholder. Production work must verify JWTs against Supabase project keys/JWKS, map roles from trusted server-side profile data, and keep RLS as the final database boundary. Sensitive request metadata is masked before audit logging. Rate limiting is marked in `app/main.py` before routes that will call LLM providers or create operational records.
+
+## Supabase End-to-End Setup Notes
+
+Codex MCP is authenticated for the project, but this running session does not expose Supabase MCP tools until restart. The repository carries deterministic migrations for schema, pgvector search, private storage buckets, storage object policies, and authenticated role grants. Apply migrations through Supabase MCP or CLI from a session with credentials loaded; never commit service-role keys or database passwords.
+
+Required backend secrets:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_JWT_SECRET` if local JWT verification is used
+
+Frontend must only receive `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
+Project URL is safe to expose. Service-role, JWT secret, database password, and provider API keys are not safe to expose and must stay out of git.

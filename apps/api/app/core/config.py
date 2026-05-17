@@ -10,12 +10,18 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development", alias="APP_ENV")
     demo_mode: bool = Field(default=True, alias="DEMO_MODE")
     supabase_url: str | None = Field(default=None, alias="SUPABASE_URL")
+    supabase_anon_key: SecretStr | None = Field(default=None, alias="SUPABASE_ANON_KEY")
     supabase_service_role_key: SecretStr | None = Field(
         default=None,
         alias="SUPABASE_SERVICE_ROLE_KEY",
     )
     supabase_jwt_secret: SecretStr | None = Field(default=None, alias="SUPABASE_JWT_SECRET")
     model_artifact_path: str = Field(default="./ml/artifacts/failure_model.joblib", alias="MODEL_ARTIFACT_PATH")
+    mistral_api_key: SecretStr | None = Field(default=None, alias="MISTRAL_API_KEY")
+    mistral_model: str = Field(default="mistral-large-latest", alias="MISTRAL_MODEL")
+    ollama_base_url: str = Field(default="http://localhost:11434", alias="OLLAMA_BASE_URL")
+    ollama_llm_model: str = Field(default="gemma4:e4b", alias="OLLAMA_LLM_MODEL")
+    ollama_embedding_model: str = Field(default="embeddinggemma", alias="OLLAMA_EMBEDDING_MODEL")
     cors_origins: list[str] = Field(
         default_factory=lambda: ["http://localhost:3000", "http://127.0.0.1:3000"],
         alias="CORS_ORIGINS",

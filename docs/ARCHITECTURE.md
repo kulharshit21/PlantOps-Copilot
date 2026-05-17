@@ -55,6 +55,10 @@ Document ingestion accepts `.md`/`.txt` style text content through the backend, 
 
 `/rag/ask` retrieves scoped chunks first, then calls chat providers through a fallback chain: Mistral adapter, Ollama adapter, then deterministic mock provider for demo resilience. Responses separate recommendation, urgency, next steps, model used, fallback status, retrieved chunks, and citations so the UI can render evidence separately from actions.
 
+## Predictive Maintenance Model
+
+`ml/training/train_failure_model.py` trains Logistic Regression and Random Forest baselines from AI4I 2020 CSV features when available, selects the best F1 model, and writes a local `joblib` artifact. If the CSV is absent, it uses a tiny synthetic fallback only to verify pipeline mechanics. The API risk service loads the artifact when present and otherwise returns a labeled heuristic demo response.
+
 ## Deployment Direction
 
 The hackathon target is local Docker Compose plus cloud-ready configuration. Supabase free tier is the planned hosted data plane, with local seed data supporting demos when external APIs are unavailable.

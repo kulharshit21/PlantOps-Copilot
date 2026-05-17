@@ -15,6 +15,7 @@ class Settings(BaseSettings):
         alias="SUPABASE_SERVICE_ROLE_KEY",
     )
     supabase_jwt_secret: SecretStr | None = Field(default=None, alias="SUPABASE_JWT_SECRET")
+    model_artifact_path: str = Field(default="./ml/artifacts/failure_model.joblib", alias="MODEL_ARTIFACT_PATH")
     cors_origins: list[str] = Field(
         default_factory=lambda: ["http://localhost:3000", "http://127.0.0.1:3000"],
         alias="CORS_ORIGINS",

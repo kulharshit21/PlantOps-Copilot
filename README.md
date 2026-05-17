@@ -65,6 +65,12 @@ python -m pytest apps/api/tests
 docker compose config
 ```
 
+Train the predictive-maintenance baseline when the AI4I CSV is available:
+
+```bash
+python ml/training/train_failure_model.py --data ml/data/ai4i2020.csv
+```
+
 API foundation endpoints:
 
 ```text

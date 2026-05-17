@@ -2,9 +2,10 @@ from enum import Enum
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.core.config import Settings, get_settings
+from app.services.supabase import SupabaseAuthError, SupabaseService, SupabaseUnavailableError
 
 
 class UserRole(str, Enum):
@@ -20,6 +21,8 @@ class CurrentUser(BaseModel):
     role: UserRole
     organization_id: str
     plant_id: str
+    profile_id: str | None = None
+    assigned_plant_ids: list[str] = Field(default_factory=list)
 
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -31,6 +34,8 @@ DEMO_USER = CurrentUser(
     role=UserRole.supervisor,
     organization_id="demo-org",
     plant_id="chennai-plant-a",
+    profile_id="demo-profile",
+    assigned_plant_ids=["chennai-plant-a"],
 )
 
 
@@ -48,8 +53,6 @@ def get_current_user(
             detail="Authentication required",
         )
 
-    # Supabase JWT verification will be implemented with project JWKS/secret.
-    # Never trust frontend role claims without backend verification.
     token = credentials.credentials.strip()
     if not token:
         raise HTTPException(
@@ -57,13 +60,43 @@ def get_current_user(
             detail="Invalid bearer token",
         )
 
+    if settings.demo_mode and token in {"demo", "demo-supervisor"}:
+        return DEMO_USER
+
+    # Never trust frontend role claims. Supabase verifies the JWT, then the
+    # backend loads role/org/plant from the trusted profiles table.
+    service = SupabaseService(settings)
+    try:
+        verified = service.verify_access_token(token)
+        profile = service.load_profile_for_user(verified.user_id)
+    except SupabaseAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Supabase bearer token or inactive profile",
+        ) from exc
+    except SupabaseUnavailableError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Supabase auth service is unavailable",
+        ) from exc
+
     request.state.auth_token_present = True
+    try:
+        role = UserRole(profile.role)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Profile role is not permitted",
+        ) from exc
+
     return CurrentUser(
-        user_id="verified-placeholder",
-        email="verified-user@example.com",
-        role=UserRole.technician,
-        organization_id="demo-org",
-        plant_id="chennai-plant-a",
+        user_id=verified.user_id,
+        email=profile.email or verified.email or "unknown@example.com",
+        role=role,
+        organization_id=profile.organization_id,
+        plant_id=profile.plant_id,
+        profile_id=profile.profile_id,
+        assigned_plant_ids=profile.assigned_plant_ids or [profile.plant_id],
     )
 
 

@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import PlainTextResponse
 
 from app.core.config import Settings, get_settings
 from app.schemas.common import HealthResponse, VersionResponse
+from app.services.metrics import METRICS
 
 router = APIRouter(tags=["system"])
 
@@ -19,3 +21,8 @@ def version(settings: Settings = Depends(get_settings)) -> VersionResponse:
         environment=settings.app_env,
         demo_mode=settings.demo_mode,
     )
+
+
+@router.get("/metrics", response_class=PlainTextResponse)
+def metrics() -> str:
+    return METRICS.prometheus_text()

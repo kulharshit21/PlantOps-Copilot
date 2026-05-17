@@ -29,6 +29,13 @@ def test_version_endpoint() -> None:
     assert payload["demo_mode"] is True
 
 
+def test_prometheus_metrics_endpoint() -> None:
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+    assert "plantops_request_count" in response.text
+
+
 def test_cors_rejects_wildcard_origins() -> None:
     with pytest.raises(ValueError, match="wildcard"):
         Settings(CORS_ORIGINS="*")

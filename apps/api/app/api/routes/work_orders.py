@@ -4,6 +4,7 @@ from app.core.config import Settings, get_settings
 from app.core.security import CurrentUser, UserRole, require_roles
 from app.schemas.work_orders import WorkOrderCreate, WorkOrderRead, WorkOrderTransition
 from app.services.audit import AuditLogService
+from app.services.metrics import METRICS
 from app.services.supabase import SupabaseService, SupabaseServiceError
 from app.services.work_orders import WORK_ORDER_SERVICE
 
@@ -49,6 +50,7 @@ def create_work_order(
             entity_id=order.id,
             details=request.model_dump(),
         )
+        METRICS.record_work_order_action()
         return order
     except SupabaseServiceError as exc:
         if not settings.demo_mode:
@@ -63,7 +65,9 @@ def create_work_order(
             resource_type="work_order",
             metadata=request.model_dump(),
         )
-        return WORK_ORDER_SERVICE.create(request, user)
+        order = WORK_ORDER_SERVICE.create(request, user)
+        METRICS.record_work_order_action()
+        return order
 
 
 @router.patch("/{order_id}", response_model=WorkOrderRead)
@@ -96,6 +100,7 @@ def transition_work_order(
             resource_id=updated.id,
             metadata={"note": request.note},
         )
+        METRICS.record_work_order_action()
         return updated
 
     service.create_audit_log(
@@ -105,4 +110,5 @@ def transition_work_order(
         entity_id=updated.id,
         details={"note": request.note},
     )
+    METRICS.record_work_order_action()
     return updated

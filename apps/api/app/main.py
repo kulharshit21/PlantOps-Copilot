@@ -2,10 +2,12 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import logging
+from time import perf_counter
 
 from app.api.routes import assets, documents, incidents, ops, rag, risk, system, triage, work_orders
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
+from app.services.metrics import METRICS
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,23 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
     )
+
+    @app.middleware("http")
+    async def metrics_middleware(request: Request, call_next):
+        started = perf_counter()
+        is_error = False
+        try:
+            response = await call_next(request)
+            is_error = response.status_code >= 500
+            return response
+        except Exception:
+            is_error = True
+            raise
+        finally:
+            METRICS.record_request(
+                latency_ms=(perf_counter() - started) * 1000,
+                is_error=is_error,
+            )
 
     # TODO(rate-limit): add per-user/IP limiter before external LLM and write routes.
     @app.exception_handler(ValueError)

@@ -4,6 +4,7 @@ from app.core.config import Settings, get_settings
 from app.core.security import CurrentUser, get_current_user
 from app.schemas.risk import RiskPredictRequest, RiskPredictResponse
 from app.services.audit import AuditLogService
+from app.services.metrics import METRICS
 from app.services.risk import RiskService
 from app.services.supabase import SupabaseService, SupabaseServiceError
 
@@ -17,6 +18,7 @@ def predict_risk(
     settings: Settings = Depends(get_settings),
 ) -> RiskPredictResponse:
     response = RiskService().predict(request)
+    METRICS.record_risk_prediction()
     try:
         SupabaseService(settings).create_model_prediction(
             user,

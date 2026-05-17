@@ -11,6 +11,7 @@ from app.services.embeddings import (
     MockEmbeddingProvider,
 )
 from app.services.llm import ChatProviderError, FallbackChatProvider
+from app.services.metrics import METRICS
 from app.services.seed_corpus import ensure_seed_corpus
 from app.services.supabase import SupabaseService, SupabaseServiceError
 
@@ -57,6 +58,7 @@ class RagService:
                 fallback_used=True,
                 confidence_notes="No evidence available.",
             )
+            METRICS.record_rag(model_used=response.model_used, fallback_used=True, no_evidence=True)
             self._persist_rag(service, user, request, response, started)
             return response
 
@@ -75,6 +77,7 @@ class RagService:
                 fallback_used=True,
                 confidence_notes="Provider fallback exhausted; retrieval-only response returned.",
             )
+            METRICS.record_rag(model_used=response.model_used, fallback_used=True, no_evidence=False)
             self._persist_rag(service, user, request, response, started)
             return response
 
@@ -88,6 +91,11 @@ class RagService:
             model_used=grounded.model_used,
             fallback_used=provider.fallback_used,
             confidence_notes="Answer generated only from retrieved evidence chunks. If evidence is thin, escalate.",
+        )
+        METRICS.record_rag(
+            model_used=response.model_used,
+            fallback_used=response.fallback_used,
+            no_evidence=False,
         )
         self._persist_rag(service, user, request, response, started)
         return response

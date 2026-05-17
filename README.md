@@ -46,11 +46,29 @@ High-level flow:
 
 ## Local Setup
 
-Implementation will be added in later phases. Expected local setup will include:
+Install frontend dependencies and backend test dependencies:
 
 ```bash
 cp .env.example .env
-docker compose up
+cd apps/web
+npm install
+cd ../api
+python -m pip install -e ".[dev]"
+```
+
+Run local checks:
+
+```bash
+npm run lint
+npm run build
+python -m pytest apps/api/tests
+docker compose config
+```
+
+Start the API locally:
+
+```bash
+docker compose up api
 ```
 
 No real secrets should be committed. Browser-safe variables must use public-safe values only, and server-only keys must stay in backend runtime environments.

@@ -1,0 +1,14 @@
+{
+  "name": "plantops-copilot",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "web:dev": "npm --prefix apps/web run dev",
+    "web:lint": "npm --prefix apps/web run lint",
+    "web:build": "npm --prefix apps/web run build",
+    "api:test": "python -m pytest apps/api/tests",
+    "lint": "npm run web:lint",
+    "build": "npm run web:build",
+    "test": "npm run api:test"
+  }
+}
